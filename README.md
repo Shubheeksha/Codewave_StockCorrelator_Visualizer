@@ -14,7 +14,7 @@ This project is a Streamlit-based web application that provides stock market ana
 
 1. Clone this repository:
    ```
-   git clone https://github.com/yourusername/stock-market-analysis.git
+   https://github.com/Shubheeksha/Codewave_StockCorrelator_Visualizer.git
    cd stock-market-analysis
    ```
 
