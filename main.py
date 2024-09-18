@@ -4,6 +4,7 @@ from app.data_fetcher import fetch_stock_data
 from app.analysis import calculate_correlation, time_series_forecast, sentiment_analysis, risk_metric
 from app.visualization import visualize_correlation
 from config.constants import tickers
+import matplotlib.pyplot as plt
 
 def main():
     st.title("Stock Market Analysis Dashboard")
