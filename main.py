@@ -1,17 +1,36 @@
 import streamlit as st
 import pandas as pd
+import networkx as nx
+import numpy as np
 from app.data_fetcher import fetch_stock_data
 from app.analysis import calculate_correlation, time_series_forecast, sentiment_analysis, risk_metric
 from app.visualization import visualize_correlation
 from config.constants import tickers
 import matplotlib.pyplot as plt
 
+def calculate_eigenvector_centrality(correlation_matrix, stock_names):
+    # Create a graph from the correlation matrix
+    G = nx.Graph()
+
+    # Add edges with correlation values as weights
+    for i in range(len(stock_names)):
+        for j in range(i + 1, len(stock_names)):
+            if i != j:
+                G.add_edge(stock_names[i], stock_names[j], weight=correlation_matrix[i, j])
+    
+    # Compute eigenvector centrality
+    centrality = nx.eigenvector_centrality_numpy(G, weight='weight')
+    
+    return centrality
+
 def main():
     st.title("Stock Market Analysis Dashboard")
 
     if 'show_forecasting' not in st.session_state:
         st.session_state.show_forecasting = False
-
+    if 'show_centrality' not in st.session_state:
+        st.session_state.show_centrality = False
+        
     # Sidebar for stock selection and date range
     st.sidebar.header("Select Stocks and Date Range")
     stock1 = st.sidebar.selectbox("Choose first stock:", tickers)
@@ -78,9 +97,50 @@ def main():
                 f'{stock2} Forecast': forecast2
             })
             st.dataframe(forecast_df.set_index('Date'))
+    
+    if st.button("Toggle Eigenvector Centrality", key="show_centrality_button"):
+        st.session_state.show_centrality = not st.session_state.show_centrality
 
-    else:
-        st.write("No data available for the selected date range and stocks.")
+    # Show Eigenvector Centrality section only if toggled
+    if st.session_state.show_centrality:
+        st.sidebar.subheader("Eigenvector Centrality for Stock Network")
+        
+        # Fetch data for all stocks
+        stock_data = {}
+        for stock in tickers:
+            data = fetch_stock_data(stock, start_date, end_date)
+            if not data.empty:
+                stock_data[stock] = data
 
+        if len(stock_data) > 1:
+            st.header("Eigenvector Centrality Analysis")
+
+            # Calculate correlation matrix
+            stock_prices = pd.DataFrame({stock: data for stock, data in stock_data.items()})
+
+            correlation_matrix = stock_prices.corr().values
+            stock_names = stock_prices.columns.tolist()
+
+            # Calculate eigenvector centrality
+            centrality = calculate_eigenvector_centrality(correlation_matrix, stock_names)
+
+            # Sort and display centrality results
+            centrality_sorted = sorted(centrality.items(), key=lambda x: x[1], reverse=True)
+            st.subheader("Most Influential Stocks (by Eigenvector Centrality)")
+            for stock, score in centrality_sorted:
+                st.write(f"{stock}: {score:.4f}")
+
+            # Optional: Visualize the correlation matrix as a heatmap
+            st.subheader("Correlation Matrix Heatmap")
+            fig, ax = plt.subplots(figsize=(10, 8))
+            cax = ax.matshow(correlation_matrix, cmap='coolwarm')
+            fig.colorbar(cax)
+            ax.set_xticks(np.arange(len(stock_names)))
+            ax.set_yticks(np.arange(len(stock_names)))
+            ax.set_xticklabels(stock_names, rotation=90)
+            ax.set_yticklabels(stock_names)
+            st.pyplot(fig)
+        else:
+            st.write("Not enough stock data available for the selected date range.")
 if __name__ == "__main__":
     main()
