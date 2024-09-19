@@ -141,8 +141,17 @@ def main():
             # Sort and display centrality results
             centrality_sorted = sorted(centrality.items(), key=lambda x: x[1], reverse=True)
             st.subheader("Most Influential Stocks (by Eigenvector Centrality)")
+            
+            stocks = [stock for stock, score in centrality_sorted]
+            scores = [score for stock, score in centrality_sorted]
+
+            bar_chart_data = pd.DataFrame({"Stock": stocks, "Centrality Score": scores})
+            st.bar_chart(bar_chart_data.set_index("Stock"))            
+            
             for stock, score in centrality_sorted:
                 st.write(f"{stock}: {score:.4f}")
+
+
 
             # Optional: Visualize the correlation matrix as a heatmap
             st.subheader("Correlation Matrix Heatmap")
