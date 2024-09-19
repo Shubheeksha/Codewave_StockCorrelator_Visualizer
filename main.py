@@ -72,20 +72,34 @@ def main():
         # Forecasting section (only visible when the button is toggled)
         if st.session_state.show_forecasting:
             st.header("Stock Price Forecasting")
-            forecast_days = st.number_input("Number of days to forecast:", min_value=1, max_value=30, value=7)
+            forecast_months = st.number_input("Number of months to forecast:", min_value=1, max_value=6, value=3)
         
             # Calculate and display forecasts
-            forecast1 = time_series_forecast(data1, forecast_days)
-            forecast2 = time_series_forecast(data2, forecast_days)
-
-            future_dates = pd.date_range(start=data1.index[-1] + pd.Timedelta(days=1), periods=forecast_days)
+            most_recent_date = data1.index[-1]
+            forecast_periods = forecast_months * 30  # Approximate number of days to forecast
             
+            # Forecasting from the most recent date in the data
+            forecast1 = time_series_forecast(data1, forecast_periods)
+            forecast2 = time_series_forecast(data2, forecast_periods)
+
+            future_dates = pd.date_range(start=most_recent_date + pd.Timedelta(days=1), periods=forecast_periods)
+
+            # Update the historical data to start from 2024
+            start_date_2024 = pd.to_datetime('2024-01-01')
+            if data1.index.tz is not None:  # Check if timezone is present
+                start_date_2024 = start_date_2024.tz_localize(data1.index.tz)
+            historical_data1 = data1[data1.index >= start_date_2024]
+            historical_data2 = data2[data2.index >= start_date_2024]
+
             fig, ax = plt.subplots(figsize=(12, 6))
-            ax.plot(data1.index, data1.values, label=f'{stock1} Historical')
-            ax.plot(data2.index, data2.values, label=f'{stock2} Historical')
+            ax.plot(historical_data1.index, historical_data1.values, label=f'{stock1} Historical')
+            ax.plot(historical_data2.index, historical_data2.values, label=f'{stock2} Historical')
+       
             ax.plot(future_dates, forecast1, label=f'{stock1} Forecast', linestyle='--')
             ax.plot(future_dates, forecast2, label=f'{stock2} Forecast', linestyle='--')
             ax.set_title("Stock Price Forecast")
+            ax.set_xlabel("Date")
+            ax.set_ylabel("Price")
             ax.legend()
             st.pyplot(fig)
 
