@@ -15,10 +15,10 @@ def time_series_forecast(stock, days=30):
     return future_y
 
 def sentiment_analysis(ticker):
-    # This is a placeholder. In a real scenario, you'd fetch news or social media data.
+    # This is a placeholder.
     news = f"The outlook for {ticker} is positive. Analysts expect growth."
     sentiment = TextBlob(news).sentiment.polarity
     return sentiment
 
 def risk_metric(stock):
-    return stock.pct_change().std() * np.sqrt(252)  # Annualized volatility
+    return stock.pct_change().std() * np.sqrt(252)  # Annualized volatility, 252 exchange day in a year.

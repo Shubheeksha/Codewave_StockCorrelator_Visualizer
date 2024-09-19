@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 def visualize_correlation(stock1, stock2, ticker1, ticker2):
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10))
     
-    # Ensure data is sorted by index (date)
+    #Indexing data
     stock1 = stock1.sort_index()
     stock2 = stock2.sort_index()
     
@@ -25,6 +25,6 @@ def visualize_correlation(stock1, stock2, ticker1, ticker2):
         elif rolling_corr.iloc[i] < 0.3:
             ax2.axvspan(rolling_corr.index[i], rolling_corr.index[i+1], facecolor='red', alpha=0.1)
     
-    # Make sure layout is tight to avoid overlapping
+    # Tight layout to avoid overlapping.
     plt.tight_layout()
     return fig

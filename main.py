@@ -44,7 +44,7 @@ def main():
     data2 = fetch_stock_data(stock2, start_date, end_date)
 
     if not data1.empty and not data2.empty:
-        # Display basic information
+        # Display stock information
         st.header("Stock Information")
         col1, col2 = st.columns(2)
         with col1:
@@ -69,7 +69,7 @@ def main():
         if st.button("Show Forecasting", key="show_forecasting_button"):
             st.session_state.show_forecasting = not st.session_state.show_forecasting
 
-        # Forecasting section (only visible when the button is toggled)
+        # Forecasting section with toggeled button
         if st.session_state.show_forecasting:
             st.header("Stock Price Forecasting")
             forecast_months = st.number_input("Number of months to forecast:", min_value=1, max_value=6, value=3)
@@ -84,7 +84,7 @@ def main():
 
             future_dates = pd.date_range(start=most_recent_date + pd.Timedelta(days=1), periods=forecast_periods)
 
-            # Update the historical data to start from 2024
+            # Historical data starting from 2024
             start_date_2024 = pd.to_datetime('2024-01-01')
             if data1.index.tz is not None:  # Check if timezone is present
                 start_date_2024 = start_date_2024.tz_localize(data1.index.tz)
@@ -103,7 +103,7 @@ def main():
             ax.legend()
             st.pyplot(fig)
 
-            # Display forecasted prices
+            # To Display forcasted prices
             st.subheader("Forecasted Prices")
             forecast_df = pd.DataFrame({
                 'Date': future_dates,
@@ -115,7 +115,7 @@ def main():
     if st.button("Toggle Eigenvector Centrality", key="show_centrality_button"):
         st.session_state.show_centrality = not st.session_state.show_centrality
 
-    # Show Eigenvector Centrality section only if toggled
+    # Toggled switch
     if st.session_state.show_centrality:
         st.sidebar.subheader("Eigenvector Centrality for Stock Network")
         
@@ -129,16 +129,16 @@ def main():
         if len(stock_data) > 1:
             st.header("Eigenvector Centrality Analysis")
 
-            # Calculate correlation matrix
+            # Calculate correlation matrix.
             stock_prices = pd.DataFrame({stock: data for stock, data in stock_data.items()})
 
             correlation_matrix = stock_prices.corr().values
             stock_names = stock_prices.columns.tolist()
 
-            # Calculate eigenvector centrality
+            # Calculate eigenvector centrality.
             centrality = calculate_eigenvector_centrality(correlation_matrix, stock_names)
 
-            # Sort and display centrality results
+            # Sort and display centrality results in a bar chart.
             centrality_sorted = sorted(centrality.items(), key=lambda x: x[1], reverse=True)
             st.subheader("Most Influential Stocks (by Eigenvector Centrality)")
             
@@ -153,7 +153,7 @@ def main():
 
 
 
-            # Optional: Visualize the correlation matrix as a heatmap
+            # Correlation matrix as a heatmap visualization.
             st.subheader("Correlation Matrix Heatmap")
             fig, ax = plt.subplots(figsize=(10, 8))
             cax = ax.matshow(correlation_matrix, cmap='coolwarm')
